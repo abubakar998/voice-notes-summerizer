@@ -130,7 +130,7 @@ def has_api_key(provider: str) -> bool:
 def ffmpeg_path() -> str | None:
     """Locate an ffmpeg binary, or None if there genuinely isn't one.
 
-    Prefers a real system install (Hugging Face Spaces gets one from
+    Prefers a real system install (deploy platforms install one from
     packages.txt), and falls back to the static binary imageio-ffmpeg bundles
     so a clean clone works on a machine with nothing installed.
     """

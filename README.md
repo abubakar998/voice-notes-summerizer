@@ -1,23 +1,10 @@
----
-title: Voice Notes Summarizer
-emoji: 🎙️
-colorFrom: indigo
-colorTo: purple
-sdk: streamlit
-sdk_version: 1.61.1
-app_file: app.py
-pinned: false
-license: mit
-short_description: Bangla and English voice notes to timestamped transcript and structured summary
----
-
 # Voice notes → transcript + summary
 
 Upload or record a voice note in Bangla or English and get back a timestamped
 transcript plus a structured summary — key points, decisions and action items —
 that you can download as Markdown or plain text.
 
-**Live demo:** _(add your Hugging Face Space URL here after deploying — see [Deployment](#deployment))_
+**Live demo:** _(add your Streamlit Community Cloud URL here after deploying — see [Deployment](#deployment))_
 
 Runs entirely on free API tiers. No paid services, no GPU, no database.
 
@@ -155,9 +142,10 @@ flowchart TD
 
 ### Hosted ASR instead of running Whisper locally
 
-Hugging Face's free tier is a slow CPU with no GPU. A 10-minute recording on
-`whisper-base` there takes several minutes, and larger models are worse — users
-assume the app has frozen. Groq serves Whisper on custom inference hardware and
+Free hosting tiers are slow CPUs with no GPU — Streamlit Community Cloud gives
+about 1 GB of RAM and a shared core. A 10-minute recording on `whisper-base`
+there takes several minutes, and larger models are worse — users assume the app
+has frozen. Groq serves Whisper on custom inference hardware and
 returns results many times faster than real time.
 
 Measured on this pipeline: **a 30-minute recording transcribed in 21.8 seconds,
@@ -277,31 +265,80 @@ pytest
 
 ## Deployment
 
-Hugging Face Spaces, free CPU tier.
+**Streamlit Community Cloud** — genuinely free, no credit card, native Streamlit.
 
-1. Create a Space at <https://huggingface.co/new-space> with **SDK = Streamlit**
-   and hardware **CPU basic (free)**.
-2. Push this repo to it:
+> **Not Hugging Face Spaces.** Spaces that run on compute now require a paid plan
+> (PRO, $9/month for personal accounts); only static Spaces remain free. If you
+> already have PRO, the instructions are in [Deploying to Hugging Face Spaces
+> instead](#deploying-to-hugging-face-spaces-instead) below.
+
+1. Push this repo to a **public GitHub repository** — Community Cloud deploys
+   from GitHub.
 
    ```bash
    git init                          # if not already a repo
-   git add .                         # .env is gitignored — check `git status`
+   git add .                         # .env is gitignored — check `git status` first
    git commit -m "Voice notes summarizer"
-   git remote add space https://huggingface.co/spaces/<user>/<space-name>
-   git push space main
+   git remote add origin https://github.com/<user>/<repo>.git
+   git push -u origin main
    ```
 
-   Spaces auto-detects `requirements.txt`, `packages.txt` and `app.py`, and reads
-   the YAML block at the top of this README for its configuration.
-3. Add `GROQ_API_KEY` and `GEMINI_API_KEY` under
-   **Settings → Variables and secrets → Repository secrets**. Never commit `.env`.
+2. Go to <https://share.streamlit.io>, sign in with GitHub, and deploy the repo
+   with **main file path = `app.py`**.
+
+3. Under **Advanced settings → Secrets**, paste the two keys in TOML form:
+
+   ```toml
+   GROQ_API_KEY = "gsk_..."
+   GEMINI_API_KEY = "AIza..."
+   ```
+
+   Keep them at the root level, not inside a `[section]`. Streamlit exposes
+   root-level secrets as environment variables, which is exactly what
+   `src/config.py` reads — so no code changes are needed. Never commit `.env`.
+
 4. **Upload an mp3 as your first test.** If it fails to decode, `packages.txt` is
-   missing or misnamed — that file installs ffmpeg and is not optional. (Locally
-   the bundled `imageio-ffmpeg` covers this, so a missing `packages.txt` will not
-   show up until you deploy.)
+   missing or misnamed — that file installs ffmpeg via apt and is not optional.
+   Locally the bundled `imageio-ffmpeg` papers over this, so a missing
+   `packages.txt` will not show up until you deploy.
+
 5. Put the resulting URL in the **Live demo** line at the top of this README.
 
-Storage on Spaces is ephemeral: nothing you upload is retained between sessions.
+**Will it fit in the free tier?** Community Cloud gives each app about 1 GB of
+RAM. Measured peak for this pipeline on a 30-minute recording is **166 MB** (49 MB
+holding the upload, 58 MB for the decoded audio, 58 MB for the split chunks), and
+a 60-minute file extrapolates to roughly 350 MB. With Streamlit's own overhead on
+top that leaves comfortable headroom — the free tier is genuinely sufficient here,
+mainly because normalizing to 16kHz mono up front keeps the decoded audio small.
+
+Apps sleep after a period without traffic and wake on the next visit, so the first
+request after an idle spell is slow. Storage is ephemeral either way: nothing you
+upload is retained between sessions.
+
+### Deploying to Hugging Face Spaces instead
+
+Only worth it if you already pay for PRO. Create a Space with **SDK = Streamlit**,
+hardware **CPU basic**, add the same two keys under **Settings → Variables and
+secrets**, push the repo, and put this YAML block back at the very top of this
+README so Spaces can configure itself:
+
+```yaml
+---
+title: Voice Notes Summarizer
+emoji: 🎙️
+colorFrom: indigo
+colorTo: purple
+sdk: streamlit
+sdk_version: 1.61.1
+app_file: app.py
+pinned: false
+license: mit
+---
+```
+
+The upside is hardware: 2 vCPU and 16 GB RAM against Community Cloud's ~1 GB,
+which this app does not need but would matter if you added local Whisper or
+diarization.
 
 ---
 
@@ -318,7 +355,7 @@ src/
 eval/
   run_eval.py           WER/CER against reference transcripts
 tests/                  audio, formatting, stitching, summarization, UI
-packages.txt            ffmpeg, for Hugging Face Spaces
+packages.txt            ffmpeg, installed via apt by the deploy platform
 ```
 
 All logic lives in `src/` so it can be tested without launching Streamlit.

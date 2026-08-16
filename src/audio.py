@@ -49,7 +49,7 @@ _configure_pydub()
 _FFMPEG_MISSING = (
     "ffmpeg was not found, so anything other than a plain WAV cannot be decoded. "
     "Install it with `pip install imageio-ffmpeg`, or system-wide from "
-    "https://ffmpeg.org/download.html. On Hugging Face Spaces this means the "
+    "https://ffmpeg.org/download.html. On a deployed app this means the "
     "packages.txt file is missing or misnamed."
 )
 

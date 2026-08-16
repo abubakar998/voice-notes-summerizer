@@ -10,8 +10,8 @@
 #
 # imageio-ffmpeg ships a static ffmpeg binary. pydub shells out to ffmpeg for
 # every format that isn't raw WAV, and this guarantees one exists even on a
-# machine with nothing installed. On Hugging Face Spaces packages.txt installs
-# the real thing and config.py prefers that.
+# machine with nothing installed. On a deployed app packages.txt installs the
+# real thing via apt and config.py prefers that.
 
 streamlit==1.61.1
 pydub==0.25.1
