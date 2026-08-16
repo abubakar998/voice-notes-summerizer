@@ -1,0 +1,21 @@
+# Runtime dependencies — everything the deployed app needs, nothing more.
+# Test- and eval-only packages live in requirements-dev.txt so a free CPU
+# container doesn't pay to install them.
+#
+# faster-whisper is deliberately NOT here. It is the local ASR fallback, and it
+# drags in ctranslate2 + onnxruntime + av (several hundred MB) that the hosted
+# app never touches, because ASR_PROVIDER defaults to "groq". It lives in
+# requirements-dev.txt; src/transcribe.py imports it lazily and explains how to
+# install it if you switch ASR_PROVIDER to "local" without it.
+#
+# imageio-ffmpeg ships a static ffmpeg binary. pydub shells out to ffmpeg for
+# every format that isn't raw WAV, and this guarantees one exists even on a
+# machine with nothing installed. On Hugging Face Spaces packages.txt installs
+# the real thing and config.py prefers that.
+
+streamlit==1.61.1
+pydub==0.25.1
+imageio-ffmpeg==0.6.0
+groq==1.6.0
+google-genai==2.18.1
+python-dotenv==1.2.2

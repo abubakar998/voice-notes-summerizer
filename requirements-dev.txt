@@ -1,0 +1,15 @@
+# Development, test and evaluation dependencies.
+#   pip install -r requirements.txt -r requirements-dev.txt
+
+-r requirements.txt
+
+pytest==9.0.1
+
+# Local ASR fallback (ASR_PROVIDER=local) and the §11 benchmark baseline.
+# Heavy: pulls ctranslate2, onnxruntime and av. Not needed to run the app.
+faster-whisper==1.2.1
+
+# Word/character error rate for eval/run_eval.py. The eval clips are pulled
+# through Hugging Face's rows API with the standard library, so `datasets` and
+# its audio-decoding stack are not needed.
+jiwer==4.0.0

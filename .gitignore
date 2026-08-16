@@ -1,0 +1,22 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.streamlit/secrets.toml
+
+# Evaluation data. Audio is large and redistribution terms vary by source, and
+# `python eval/run_eval.py --fetch` rebuilds both clips and references exactly.
+# The scored results are committed: they are the evidence behind the table in
+# the README, and a claim about Bangla accuracy with no data behind it is just
+# an assertion.
+eval/samples/
+eval/references/
+
+# Scratch transcripts from the build-order verification scripts.
+scratch/
+*.wav
+*.mp3
+*.m4a
+!eval/fixtures/*.wav
