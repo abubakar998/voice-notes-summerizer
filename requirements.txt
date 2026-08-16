@@ -16,6 +16,15 @@
 streamlit==1.61.1
 pydub==0.25.1
 imageio-ffmpeg==0.6.0
+
+# pydub imports the stdlib `audioop` module, which PEP 594 removed in Python
+# 3.13. Its internal fallback (`import pyaudioop`) refers to a package that does
+# not exist on PyPI, so on a newer interpreter pydub fails at import with a bare
+# ModuleNotFoundError. Deployment platforms pick their own Python — Streamlit
+# Community Cloud defaults to 3.14 — so this is not hypothetical. audioop-lts is
+# the maintained port of the removed module; the marker keeps it off 3.12 and
+# below, where audioop is still built in.
+audioop-lts==0.2.2 ; python_version >= "3.13"
 groq==1.6.0
 google-genai==2.18.1
 python-dotenv==1.2.2

@@ -232,6 +232,8 @@ falling over is as routine as being rate limited.
 
 From a clean clone:
 
+Developed and tested on **Python 3.11**; the test suite also passes on 3.14.
+
 ```bash
 git clone <your-repo-url>
 cd voice-notes-summarizer
@@ -303,6 +305,23 @@ pytest
    `packages.txt` will not show up until you deploy.
 
 5. Put the resulting URL in the **Live demo** line at the top of this README.
+
+#### If the deploy fails on `ModuleNotFoundError: No module named 'pyaudioop'`
+
+Community Cloud picks its own Python, currently 3.14. `audioop` was removed from
+the standard library in Python 3.13, and pydub imports it — its internal fallback
+reaches for a `pyaudioop` package that has never existed on PyPI, so pydub dies at
+import before your app runs a single line.
+
+`requirements.txt` already fixes this by pulling in `audioop-lts` on Python 3.13
+and above. If you hit it anyway, you are deploying an older commit — push again.
+Pinning the Python version to 3.12 in the app's **Advanced settings** works too,
+and is the more conservative option since every version in `requirements.txt` was
+resolved against 3.11.
+
+This class of failure cannot reproduce locally when your machine runs 3.11, which
+is exactly why the version pin matters: the platform's default Python moved out
+from under the app.
 
 **Will it fit in the free tier?** Community Cloud gives each app about 1 GB of
 RAM. Measured peak for this pipeline on a 30-minute recording is **166 MB** (49 MB
